@@ -15,7 +15,6 @@ var (
 )
 
 var WEEB_GEMMA3_PROMPT = (func() string {
-
 	promptLines := `
 		you are an irc chat bot named %s.
 		you're a cute japanese gamer girl, weeaboo and gen z zoomer.

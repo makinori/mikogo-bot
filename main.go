@@ -30,7 +30,16 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 
 	log.Printf("%s: %s", username, message)
 
-	if strings.Contains(strings.ToLower(message), IRC_USERNAME) {
+	messageLower := strings.ToLower(message)
+
+	if strings.HasPrefix(messageLower, "!") {
+		if strings.HasPrefix(messageLower, "!testlong") {
+			WriteToChannel(conn, channel, "ok trying to send a long message..")
+
+			WriteToChannel(conn, channel, "yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn. yo yo, what's up gamer? how are you? hell yeah lets go, this is working out great. let's gettinnn.")
+		}
+
+	} else if strings.Contains(strings.ToLower(messageLower), IRC_USERNAME) {
 		gemmaResultChan := make(chan string)
 		go WeebGemma3(username, message, gemmaResultChan)
 		gemmaResult := <-gemmaResultChan
@@ -77,7 +86,6 @@ func loop(conn net.Conn) {
 }
 
 func main() {
-
 	conn, err := tls.Dial("tcp", IRC_ADDRESS, &tls.Config{
 		InsecureSkipVerify: false,
 	})
