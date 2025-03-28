@@ -11,6 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o mikogo-irc-bot
 
 FROM scratch
 
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
 WORKDIR /app
 
 COPY --from=build /app/mikogo-irc-bot /app/mikogo-irc-bot
