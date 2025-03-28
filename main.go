@@ -3,15 +3,14 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
-	"fmt"
 	"io"
-	"log"
 	"net"
 	"regexp"
 	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"github.com/charmbracelet/log"
 	emoji "github.com/tmdvs/Go-Emoji-Utils"
 )
 
@@ -28,7 +27,7 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 		return
 	}
 
-	log.Printf("%s: %s", username, message)
+	log.Infof("> %s: %s", username, message)
 
 	messageLower := strings.ToLower(message)
 
@@ -48,10 +47,11 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 			return
 		}
 
-		WriteToChannel(
-			conn, channel,
-			username+": "+strings.ToLower(emoji.RemoveAll(gemmaResult)),
-		)
+		gemmaResult = strings.ToLower(emoji.RemoveAll(gemmaResult))
+
+		log.Infof("weeb gemma3: %s", gemmaResult)
+
+		WriteToChannel(conn, channel, username+": "+gemmaResult)
 	}
 }
 
@@ -62,10 +62,10 @@ func loop(conn net.Conn) {
 		message, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				log.Println("Server closed connection")
+				log.Info("server closed connection")
 				break
 			} else {
-				log.Panicln("Error reading:", err.Error())
+				log.Info("error reading:", err.Error())
 				break
 			}
 		}
@@ -86,12 +86,14 @@ func loop(conn net.Conn) {
 }
 
 func main() {
+	log.Infof("connecting to: %s", IRC_ADDRESS)
+
 	conn, err := tls.Dial("tcp", IRC_ADDRESS, &tls.Config{
 		InsecureSkipVerify: false,
 	})
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	defer conn.Close()

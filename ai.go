@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 var (
@@ -46,7 +47,7 @@ func WeebGemma3(username string, message string, result chan string) {
 	})
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		result <- ""
 		return
 	}
@@ -56,7 +57,7 @@ func WeebGemma3(username string, message string, result chan string) {
 	)
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		result <- ""
 		return
 	}
@@ -67,14 +68,14 @@ func WeebGemma3(username string, message string, result chan string) {
 	res, err := client.Do(req)
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		result <- ""
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		log.Println(string(body))
+		log.Error(string(body))
 		result <- ""
 		return
 	}
@@ -84,7 +85,7 @@ func WeebGemma3(username string, message string, result chan string) {
 	body, err := io.ReadAll(res.Body)
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		result <- ""
 		return
 	}
@@ -98,7 +99,7 @@ func WeebGemma3(username string, message string, result chan string) {
 	err = json.Unmarshal(body, &ollamaRes)
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		result <- ""
 		return
 	}
