@@ -1,0 +1,4 @@
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/tmdvs/Go-Emoji-Utils v1.2.1 h1:iAsCe32InX7ec54BeT7SavNTtPyQajb2l7uGy2GRXC8=
+github.com/tmdvs/Go-Emoji-Utils v1.2.1/go.mod h1:rl/2WQNbfyy82TNWwzhkjlgtsYy0IvKI9TZ2ViMajQ0=
