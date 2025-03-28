@@ -55,6 +55,8 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 	}
 }
 
+var connected bool = false
+
 func loop(conn net.Conn) {
 	reader := bufio.NewReader(conn)
 
@@ -70,7 +72,12 @@ func loop(conn net.Conn) {
 			}
 		}
 
-		fmt.Print(message)
+		if !connected {
+			if strings.Contains(message, "001") || strings.Contains(message, "Welcome") {
+				log.Info("connected to server!")
+				connected = true
+			}
+		}
 
 		matches := PRIVMSG_REGEXP.FindStringSubmatch(message)
 		if len(matches) == 0 {
