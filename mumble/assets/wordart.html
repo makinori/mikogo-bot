@@ -1,0 +1,82 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="./css3wordart/style.css" />
+		<style>
+			* {
+				margin: 0;
+			}
+
+			body {
+				background: transparent;
+				overflow: hidden;
+			}
+
+			#container {
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.wordart {
+				font-size: 12em;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+		<script>
+			const classes = [
+				// "outline",
+				// "up",
+				// "arc",
+				// "squeeze",
+				// "inverted-arc",
+				// "basic-stack",
+				"italic-outline",
+				"slate",
+				"mauve",
+				"graydient",
+				"red-blue",
+				// "brown-stack",
+				"radial",
+				"purple",
+				"green-marble",
+				"rainbow",
+				"aqua",
+				// "texture-stack",
+				"paper-bag",
+				"sunset",
+				"tilt",
+				"blues",
+				"yellow-dash",
+				// "green-stack",
+				"chrome",
+				"marble-slab",
+				"gray-block",
+				"superhero",
+				"horizon",
+				// "stack-3d",
+			];
+
+			function makeText(text) {
+				const div = document.createElement("div");
+
+				div.className = `wordart ${
+					classes[Math.floor(Math.random() * classes.length)]
+				}`;
+
+				const span = document.createElement("span");
+				span.className = "text";
+				span.setAttribute("data-text", text);
+				span.textContent = text;
+
+				div.appendChild(span);
+
+				document.getElementById("container").appendChild(div);
+			}
+		</script>
+	</body>
+</html>
