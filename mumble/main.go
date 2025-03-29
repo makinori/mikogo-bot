@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/charmbracelet/log"
@@ -12,6 +14,8 @@ import (
 
 var (
 	DEBUG = getEnvExists("DEBUG")
+
+	ROD_DOCKER_HOST = getEnv("ROD_DOCKER_HOST", "")
 
 	MUMBLE_CHANNEL = getEnv("MUMBLE_CHANNEL", "")
 )
@@ -45,8 +49,18 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	browserLauncher := launcher.New().Headless(true).MustLaunch()
-	browser := rod.New().ControlURL(browserLauncher).MustConnect()
+	var browser *rod.Browser
+
+	if ROD_DOCKER_HOST != "" {
+		// https://github.com/go-rod/rod/blob/main/lib/examples/launch-managed/main.go
+		browserLauncher := launcher.MustNewManaged(fmt.Sprintf("ws://%s:7317", ROD_DOCKER_HOST))
+		browserLauncher.Set("disable-gpu").Delete("disable-gpu")
+		browserLauncher.Headless(false).XVFB("--server-num=5", "--server-args=-screen 0 1600x900x16")
+		browser = rod.New().Client(browserLauncher.MustClient()).MustConnect()
+	} else {
+		browserLauncher := launcher.New().Headless(true).MustLaunch()
+		browser = rod.New().ControlURL(browserLauncher).MustConnect()
+	}
 
 	// TODO: pass username and server through env?
 
