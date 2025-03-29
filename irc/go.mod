@@ -1,4 +1,4 @@
-module maki.cafe/mikogo-irc-bot
+module github.com/makinori/mikogo/irc
 
 go 1.24.1
 
