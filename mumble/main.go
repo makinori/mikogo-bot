@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -20,18 +21,20 @@ var (
 	MUMBLE_CHANNEL = getEnv("MUMBLE_CHANNEL", "")
 )
 
-// func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Browser) {
-// 	if e.Sender.Name != "Maki" {
-// 		return
-// 	}
+func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Browser) {
+	if msg == "test" {
+		wordArtImg := makeWordArtPng(browser, e.Sender.Name)
 
-// 	if strings.HasPrefix(msg, "test") {
-// 		// if len(msg) <= 5 {
-// 		// 	return
-// 		// }
+		html := imageForMumble(wordArtImg, &MumbleImageOptions{
+			Transparent: true,
+			MaxHeight:   100,
+		})
 
-// 	}
-// }
+		e.Sender.Channel.Send(html, false)
+
+		// sendToAll(e.Client, html)
+	}
+}
 
 func handleUserConnected(e *gumble.UserChangeEvent, browser *rod.Browser) {
 	wordArtImg := makeWordArtPng(browser, e.User.Name)
@@ -49,17 +52,17 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	log.Info("initializing browser...")
-
 	var browser *rod.Browser
 
 	if ROD_DOCKER_HOST != "" {
+		log.Info("initializing browser through docker...")
 		// https://github.com/go-rod/rod/blob/main/lib/examples/launch-managed/main.go
 		browserLauncher := launcher.MustNewManaged(fmt.Sprintf("ws://%s:7317", ROD_DOCKER_HOST))
 		browserLauncher.Set("disable-gpu").Delete("disable-gpu")
 		browserLauncher.Headless(false).XVFB("--server-num=5", "--server-args=-screen 0 1600x900x16")
 		browser = rod.New().Client(browserLauncher.MustClient()).MustConnect()
 	} else {
+		log.Info("initializing browser regularly...")
 		browserLauncher := launcher.New().Headless(true).MustLaunch()
 		browser = rod.New().ControlURL(browserLauncher).MustConnect()
 	}
@@ -89,17 +92,17 @@ func main() {
 			log.Infof("moved to: %s", foundChannel.Name)
 		},
 
-		// TextMessage: func(e *gumble.TextMessageEvent) {
-		// 	if e.Sender == nil {
-		// 		return
-		// 	}
+		TextMessage: func(e *gumble.TextMessageEvent) {
+			if e.Sender == nil {
+				return
+			}
 
-		// 	msg := strings.TrimSpace(e.Message)
+			msg := strings.TrimSpace(e.Message)
 
-		// 	log.Infof("%s: %s", e.Sender.Name, msg)
+			log.Infof("%s: %s", e.Sender.Name, msg)
 
-		// 	go handleTextMessage(e, msg, browser)
-		// },
+			go handleTextMessage(e, msg, browser)
+		},
 
 		UserChange: func(e *gumble.UserChangeEvent) {
 			if e.Type.Has(gumble.UserChangeConnected) {
