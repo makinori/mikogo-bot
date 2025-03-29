@@ -17,4 +17,5 @@ WORKDIR /app
 
 COPY --from=build /app/mikogo-mumble /app/mikogo-mumble
 
-ENTRYPOINT ["/app/mikogo-mumble"]
+# TODO: fix reee
+ENTRYPOINT ["/app/mikogo-mumble", "-username", "mikogo", "-server", "dbuild.xyz"]

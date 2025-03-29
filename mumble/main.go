@@ -49,6 +49,8 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
+	log.Info("initializing browser...")
+
 	var browser *rod.Browser
 
 	if ROD_DOCKER_HOST != "" {
@@ -63,6 +65,8 @@ func main() {
 	}
 
 	// TODO: pass username and server through env?
+
+	log.Info("connecting to mumble...")
 
 	gumbleutil.Main(gumbleutil.AutoBitrate, gumbleutil.Listener{
 		Connect: func(e *gumble.ConnectEvent) {
