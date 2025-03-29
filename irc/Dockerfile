@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o mikogo-irc-bot
+RUN CGO_ENABLED=0 GOOS=linux go build -o mikogo-irc
 
 FROM scratch
 
@@ -15,6 +15,6 @@ COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 WORKDIR /app
 
-COPY --from=build /app/mikogo-irc-bot /app/mikogo-irc-bot
+COPY --from=build /app/mikogo-irc /app/mikogo-irc
 
-ENTRYPOINT ["/app/mikogo-irc-bot"]
+ENTRYPOINT ["/app/mikogo-irc"]
