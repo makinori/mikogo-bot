@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net"
 	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -18,7 +20,9 @@ var (
 
 	ROD_DOCKER_HOST = getEnv("ROD_DOCKER_HOST", "")
 
-	MUMBLE_CHANNEL = getEnv("MUMBLE_CHANNEL", "")
+	MUMBLE_USERNAME = getEnv("MUMBLE_USERNAME", "mikogo")
+	MUMBLE_SERVER   = getEnv("MUMBLE_SERVER", "")
+	MUMBLE_CHANNEL  = getEnv("MUMBLE_CHANNEL", "")
 )
 
 func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Browser) {
@@ -52,6 +56,10 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
+	if MUMBLE_SERVER == "" {
+		log.Fatal("please specify MUMBLE_SERVER")
+	}
+
 	var browser *rod.Browser
 
 	if ROD_DOCKER_HOST != "" {
@@ -71,7 +79,15 @@ func main() {
 
 	log.Info("connecting to mumble...")
 
-	gumbleutil.Main(gumbleutil.AutoBitrate, gumbleutil.Listener{
+	keepAlive := make(chan bool)
+
+	config := gumble.NewConfig()
+
+	config.Username = MUMBLE_USERNAME
+
+	config.Attach(gumbleutil.AutoBitrate)
+
+	config.Attach(gumbleutil.Listener{
 		Connect: func(e *gumble.ConnectEvent) {
 			log.Infof("connected as: %s", e.Client.Self.Name)
 
@@ -110,6 +126,17 @@ func main() {
 				go handleUserConnected(e, browser)
 			}
 		},
+
+		Disconnect: func(e *gumble.DisconnectEvent) {
+			keepAlive <- true
+		},
 	})
+
+	_, err := gumble.DialWithDialer(new(net.Dialer), MUMBLE_SERVER, config, &tls.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	<-keepAlive
 
 }
