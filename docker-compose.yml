@@ -1,0 +1,24 @@
+services:
+    irc:
+        build: ./mikogo-git/irc
+        restart: always
+        environment:
+            IRC_ADDRESS: ":6697"
+            IRC_CHANNEL: "#"
+            IRC_USERNAME: ""
+            OLLAMA_URL: "https://"
+
+    # rod:
+    #     image: ghcr.io/go-rod/rod:latest
+    #     restart: always
+
+    # mumble:
+    #     build: ./mikogo-git/mumble
+    #     restart: always
+    #     depends_on:
+    #         - rod
+    #     environment:
+    #         MUMBLE_USERNAME: ""
+    #         MUMBLE_SERVER: ":64738"
+    #         MUMBLE_CHANNEL: ""
+    #         ROD_DOCKER_HOST: "rod"
