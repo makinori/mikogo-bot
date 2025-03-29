@@ -75,8 +75,6 @@ func main() {
 		browser = rod.New().ControlURL(browserLauncher).MustConnect()
 	}
 
-	// TODO: pass username and server through env?
-
 	log.Info("connecting to mumble...")
 
 	keepAlive := make(chan bool)
@@ -84,7 +82,6 @@ func main() {
 	config := gumble.NewConfig()
 
 	config.Username = MUMBLE_USERNAME
-
 	config.Attach(gumbleutil.AutoBitrate)
 
 	config.Attach(gumbleutil.Listener{
@@ -106,6 +103,8 @@ func main() {
 
 			e.Client.Self.Move(foundChannel)
 			log.Infof("moved to: %s", foundChannel.Name)
+
+			e.Client.Self.SetSelfDeafened(true)
 		},
 
 		TextMessage: func(e *gumble.TextMessageEvent) {
