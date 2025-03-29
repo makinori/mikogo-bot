@@ -1,0 +1,2 @@
+-   handle errors. was so sleepy when making this. dont use Must functions
+-   rod in docker still broken rip
