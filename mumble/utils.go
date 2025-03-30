@@ -20,8 +20,8 @@ import (
 
 // TODO: should we use *image.Image instead
 
-func transparentPage(page *rod.Page) {
-	(&proto.EmulationSetDefaultBackgroundColorOverride{
+func setTransparentPage(page *rod.Page) error {
+	return (proto.EmulationSetDefaultBackgroundColorOverride{
 		Color: &proto.DOMRGBA{
 			R: 0,
 			G: 0,
@@ -29,6 +29,12 @@ func transparentPage(page *rod.Page) {
 			A: gson.Num(0),
 		},
 	}).Call(page)
+}
+
+func setHTML(page *rod.Page, html string) error {
+	return (proto.PageSetDocumentContent{
+		HTML: html,
+	}.Call(page))
 }
 
 func cropImage(src image.Image, bounds image.Rectangle) image.Image {

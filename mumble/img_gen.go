@@ -6,42 +6,66 @@ import (
 	"image/png"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
 )
 
-func makeWordArtPng(browser *rod.Browser, text string) image.Image {
-	wordartPath, _ := filepath.Abs("./assets/wordart.html")
+func makeWordArtPng(browser *rod.Browser, text string) (image.Image, error) {
+	wordartPath, err := filepath.Abs("./assets/wordart.html")
+	if err != nil {
+		return image.Black, err
+	}
 
 	url := url.URL{
 		Scheme: "file",
 		Path:   wordartPath,
 	}
 
-	page, _ := browser.Page(proto.TargetCreateTarget{
-		URL:        url.String(),
-		Background: false,
+	page, err := browser.Page(proto.TargetCreateTarget{
+		URL: url.String(),
 	})
+
+	if err != nil {
+		return image.Black, err
+	}
 
 	defer page.MustClose()
 
-	transparentPage(page)
+	err = setTransparentPage(page)
+	if err != nil {
+		return image.Black, err
+	}
 
 	page.SetViewport(&proto.EmulationSetDeviceMetricsOverride{
 		Width:  2560,
 		Height: 1440,
 	})
 
-	page.MustWaitDOMStable()
+	err = page.WaitDOMStable(time.Second, 0)
+	if err != nil {
+		return image.Black, err
+	}
 
-	page.MustEval("makeText", text)
+	_, err = page.Eval("makeText", text)
+	if err != nil {
+		return image.Black, err
+	}
 
-	imagePngBytes, _ := page.Screenshot(true, &proto.PageCaptureScreenshot{
+	imagePngBytes, err := page.Screenshot(true, &proto.PageCaptureScreenshot{
 		Format: proto.PageCaptureScreenshotFormatPng,
 	})
 
-	wordArtImage, _ := png.Decode(bytes.NewReader(imagePngBytes))
+	if err != nil {
+		return image.Black, err
+	}
+
+	wordArtImage, err := png.Decode(bytes.NewReader(imagePngBytes))
+	if err != nil {
+		return image.Black, err
+	}
+
 	wordArtImage = trimPngByTransparency(wordArtImage)
 
 	// var outputPng bytes.Buffer
@@ -49,5 +73,5 @@ func makeWordArtPng(browser *rod.Browser, text string) image.Image {
 
 	// return outputPng.Bytes()
 
-	return wordArtImage
+	return wordArtImage, nil
 }

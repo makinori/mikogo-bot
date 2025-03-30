@@ -21,4 +21,3 @@ services:
     #         MUMBLE_USERNAME: ""
     #         MUMBLE_SERVER: ":64738"
     #         MUMBLE_CHANNEL: ""
-    #         ROD_DOCKER_HOST: "rod"

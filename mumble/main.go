@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -18,7 +19,7 @@ import (
 var (
 	DEBUG = getEnvExists("DEBUG")
 
-	ROD_DOCKER_HOST = getEnv("ROD_DOCKER_HOST", "")
+	CHROMIUM_PATH = getEnv("CHROMIUM_PATH", "") // if empty, will download
 
 	MUMBLE_USERNAME = getEnv("MUMBLE_USERNAME", "mikogo")
 	MUMBLE_SERVER   = getEnv("MUMBLE_SERVER", "")
@@ -27,7 +28,10 @@ var (
 
 func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Browser) {
 	if msg == "test" {
-		wordArtImg := makeWordArtPng(browser, e.Sender.Name)
+		wordArtImg, err := makeWordArtPng(browser, e.Sender.Name)
+		if err != nil {
+			e.Sender.Channel.Send(err.Error(), false)
+		}
 
 		html := imageForMumble(wordArtImg, &MumbleImageOptions{
 			Transparent: true,
@@ -41,7 +45,10 @@ func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Brow
 }
 
 func handleUserConnected(e *gumble.UserChangeEvent, browser *rod.Browser) {
-	wordArtImg := makeWordArtPng(browser, e.User.Name)
+	wordArtImg, err := makeWordArtPng(browser, e.User.Name)
+	if err != nil {
+		return
+	}
 
 	html := imageForMumble(wordArtImg, &MumbleImageOptions{
 		Transparent: true,
@@ -60,19 +67,23 @@ func main() {
 		log.Fatal("please specify MUMBLE_SERVER")
 	}
 
-	var browser *rod.Browser
+	log.Info("initializing browser regularly...")
 
-	if ROD_DOCKER_HOST != "" {
-		log.Info("initializing browser through docker...")
-		// https://github.com/go-rod/rod/blob/main/lib/examples/launch-managed/main.go
-		browserLauncher := launcher.MustNewManaged(fmt.Sprintf("ws://%s:7317", ROD_DOCKER_HOST))
-		browserLauncher.Set("disable-gpu").Delete("disable-gpu")
-		browserLauncher.Headless(false).XVFB("--server-num=5", "--server-args=-screen 0 1600x900x16")
-		browser = rod.New().Client(browserLauncher.MustClient()).MustConnect()
-	} else {
-		log.Info("initializing browser regularly...")
-		browserLauncher := launcher.New().Headless(true).MustLaunch()
-		browser = rod.New().ControlURL(browserLauncher).MustConnect()
+	browserLauncher, err := launcher.New().
+		Headless(true).
+		Bin(CHROMIUM_PATH).
+		Launch()
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	browser := rod.New().ControlURL(browserLauncher)
+	err = browser.Connect()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	log.Info("connecting to mumble...")
@@ -131,7 +142,7 @@ func main() {
 		},
 	})
 
-	_, err := gumble.DialWithDialer(new(net.Dialer), MUMBLE_SERVER, config, &tls.Config{})
+	_, err = gumble.DialWithDialer(new(net.Dialer), MUMBLE_SERVER, config, &tls.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
