@@ -105,6 +105,9 @@ func main() {
 
 	defer conn.Close()
 
+	tcpConn, _ := conn.NetConn().(*net.TCPConn)
+	tcpConn.SetKeepAlive(true)
+
 	WriteSprintf(conn, "NICK %s\r\n", IRC_USERNAME)
 	WriteSprintf(conn, "USER %s %s %s :Real Name\r\n",
 		IRC_USERNAME, IRC_USERNAME, IRC_USERNAME)
