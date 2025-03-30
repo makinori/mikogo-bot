@@ -124,7 +124,7 @@ type MumbleImageOptions struct {
 	MaxHeight   int
 }
 
-func imageForMumble(src image.Image, options *MumbleImageOptions) string {
+func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error) {
 	// Log::imageToImg(QImage img, int maxSize)
 	// for defaults: max width, max height and quality
 
@@ -145,22 +145,31 @@ func imageForMumble(src image.Image, options *MumbleImageOptions) string {
 
 	if options.Transparent {
 		dataUri = "image/png"
-		enc := &png.Encoder{
+
+		err := (&png.Encoder{
 			CompressionLevel: png.BestCompression,
+		}).Encode(&bytes, dst)
+
+		if err != nil {
+			return "", err
 		}
-		_ = enc.Encode(&bytes, dst)
 	} else {
 		dataUri = "image/jpeg"
-		_ = jpeg.Encode(&bytes, dst, &jpeg.Options{
+
+		err := jpeg.Encode(&bytes, dst, &jpeg.Options{
 			Quality: 100,
 		})
+
+		if err != nil {
+			return "", err
+		}
 	}
 
 	encoded := url.QueryEscape(base64.StdEncoding.EncodeToString(bytes.Bytes()))
 
 	return fmt.Sprintf(
 		`<br /><img src="data:%s;base64,%s" />`, dataUri, encoded,
-	)
+	), nil
 }
 
 func getRootChannel(client *gumble.Client) *gumble.Channel {

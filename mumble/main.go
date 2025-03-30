@@ -33,10 +33,14 @@ func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Brow
 			e.Sender.Channel.Send(err.Error(), false)
 		}
 
-		html := imageForMumble(wordArtImg, &MumbleImageOptions{
+		html, err := imageForMumble(wordArtImg, &MumbleImageOptions{
 			Transparent: true,
 			MaxHeight:   100,
 		})
+
+		if err != nil {
+			e.Sender.Channel.Send(err.Error(), false)
+		}
 
 		e.Sender.Channel.Send(html, false)
 
@@ -50,10 +54,14 @@ func handleUserConnected(e *gumble.UserChangeEvent, browser *rod.Browser) {
 		return
 	}
 
-	html := imageForMumble(wordArtImg, &MumbleImageOptions{
+	html, err := imageForMumble(wordArtImg, &MumbleImageOptions{
 		Transparent: true,
 		MaxHeight:   100,
 	})
+
+	if err != nil {
+		return
+	}
 
 	sendToAll(e.Client, html)
 }
@@ -80,6 +88,7 @@ func main() {
 	}
 
 	browser := rod.New().ControlURL(browserLauncher)
+
 	err = browser.Connect()
 	if err != nil {
 		fmt.Println(err)

@@ -31,7 +31,7 @@ func makeWordArtPng(browser *rod.Browser, text string) (image.Image, error) {
 		return image.Black, err
 	}
 
-	defer page.MustClose()
+	defer page.Close()
 
 	err = setTransparentPage(page)
 	if err != nil {
