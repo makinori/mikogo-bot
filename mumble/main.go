@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"slices"
 	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -24,6 +25,8 @@ var (
 	MUMBLE_USERNAME = getEnv("MUMBLE_USERNAME", "mikogo")
 	MUMBLE_SERVER   = getEnv("MUMBLE_SERVER", "")
 	MUMBLE_CHANNEL  = getEnv("MUMBLE_CHANNEL", "")
+
+	JOIN_IGNORE_USERS = []string{"tesutogo"}
 )
 
 func handleTextMessage(e *gumble.TextMessageEvent, msg string, browser *rod.Browser) {
@@ -142,6 +145,11 @@ func main() {
 		UserChange: func(e *gumble.UserChangeEvent) {
 			if e.Type.Has(gumble.UserChangeConnected) {
 				log.Infof("%s %s", e.User.Name, "joined")
+
+				if slices.Contains(JOIN_IGNORE_USERS, strings.ToLower(e.User.Name)) {
+					return
+				}
+
 				go handleUserConnected(e, browser)
 			}
 		},
