@@ -78,7 +78,7 @@ func main() {
 		log.Fatal("please specify MUMBLE_SERVER")
 	}
 
-	log.Info("initializing browser regularly...")
+	log.Info("initializing browser...")
 
 	browserLauncher, err := launcher.New().
 		Headless(true).
