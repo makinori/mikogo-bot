@@ -124,6 +124,11 @@ type MumbleImageOptions struct {
 	MaxHeight   int
 }
 
+func dataUri(data []byte, mimetype string) string {
+	encoded := url.QueryEscape(base64.StdEncoding.EncodeToString(data))
+	return fmt.Sprintf("data:%s;base64,%s", mimetype, encoded)
+}
+
 func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error) {
 	// Log::imageToImg(QImage img, int maxSize)
 	// for defaults: max width, max height and quality
@@ -140,11 +145,11 @@ func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error
 
 	dst := resizeImageKeepAspectRatio(src, maxWidth, maxHeight)
 
-	var dataUri string
+	var mimetype string
 	var bytes bytes.Buffer
 
 	if options.Transparent {
-		dataUri = "image/png"
+		mimetype = "image/png"
 
 		err := (&png.Encoder{
 			CompressionLevel: png.BestCompression,
@@ -154,7 +159,7 @@ func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error
 			return "", err
 		}
 	} else {
-		dataUri = "image/jpeg"
+		mimetype = "image/jpeg"
 
 		err := jpeg.Encode(&bytes, dst, &jpeg.Options{
 			Quality: 100,
@@ -165,10 +170,8 @@ func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error
 		}
 	}
 
-	encoded := url.QueryEscape(base64.StdEncoding.EncodeToString(bytes.Bytes()))
-
 	return fmt.Sprintf(
-		`<br /><img src="data:%s;base64,%s" />`, dataUri, encoded,
+		`<br /><img src="%s" />`, dataUri(bytes.Bytes(), mimetype),
 	), nil
 }
 
