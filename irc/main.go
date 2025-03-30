@@ -41,7 +41,7 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 
 	} else if strings.Contains(strings.ToLower(messageLower), IRC_USERNAME) {
 		gemmaResultChan := make(chan string)
-		go WeebGemma3(username, message, gemmaResultChan)
+		go Gemma3(username, message, gemmaResultChan)
 		gemmaResult := <-gemmaResultChan
 
 		if gemmaResult == "" {
@@ -50,7 +50,7 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 
 		gemmaResult = strings.ToLower(emoji.RemoveAll(gemmaResult))
 
-		log.Infof("weeb gemma3: %s", gemmaResult)
+		log.Infof("gemma3: %s", gemmaResult)
 
 		WriteToChannel(conn, channel, username+": "+gemmaResult)
 	}

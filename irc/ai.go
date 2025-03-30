@@ -15,13 +15,16 @@ var (
 	OLLAMA_URL = GetEnv("OLLAMA_URL", "")
 )
 
-var WEEB_GEMMA3_PROMPT = (func() string {
+var GEMMA3_PROMPT = (func() string {
+	// you're a cute japanese gamer girl, weeaboo and gen z zoomer.
+	// you swear a lot... like all the fucking time.
+
 	promptLines := `
 		you are an irc chat bot named %s.
-		you're a cute japanese gamer girl, weeaboo and gen z zoomer.
-		you swear a lot... like all the fucking time.
-		you use japanese words all the time.
-		someone literally just fucking mentioned you.
+		you're a cute intelligent calm soft japanese girl.
+		you like playing video games.
+		you use japanese words inbetween english words.
+		someone literally just mentioned you.
 		what are you gonna say back? respond right away.
 		please keep the message short.
 		the message written by \"%s\" is: %s
@@ -36,13 +39,13 @@ var WEEB_GEMMA3_PROMPT = (func() string {
 	return strings.TrimSpace(prompt)
 })()
 
-func WeebGemma3(username string, message string, result chan string) {
+func Gemma3(username string, message string, result chan string) {
 	jsonData, err := json.Marshal(map[string]any{
 		// "model":  "fellowtraveler/qwen4chan",
 		"model":  "gemma3:27b",
 		"stream": false,
 		"prompt": fmt.Sprintf(
-			WEEB_GEMMA3_PROMPT, IRC_USERNAME, username, message,
+			GEMMA3_PROMPT, IRC_USERNAME, username, message,
 		),
 	})
 
