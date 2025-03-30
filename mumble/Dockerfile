@@ -19,5 +19,6 @@ ENV CHROMIUM_PATH=/usr/bin/chromium
 WORKDIR /app
 
 COPY --from=build /app/mikogo-mumble /app/mikogo-mumble
+COPY assets/ /app/assets/
 
 ENTRYPOINT ["/app/mikogo-mumble"]
