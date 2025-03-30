@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func WriteSprintf(conn net.Conn, format string, a ...any) (int, error) {
+func WritePrintf(conn net.Conn, format string, a ...any) (int, error) {
 	return conn.Write(fmt.Appendf([]byte{}, format, a...))
 }
 
@@ -34,7 +34,7 @@ func WriteToChannel(conn net.Conn, channel string, message string) {
 			// if splitLinesLen > 1 {
 			// 	splitLine = fmt.Sprintf("[%d/%d] %s", i+1, splitLinesLen, splitLine)
 			// }
-			WriteSprintf(conn, privmsgFormat, channel, splitLine)
+			WritePrintf(conn, privmsgFormat, channel, splitLine)
 		}
 	}
 }

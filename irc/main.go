@@ -7,6 +7,7 @@ import (
 	"net"
 	"regexp"
 	"strings"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -55,7 +56,13 @@ func handleMessage(conn net.Conn, username string, channel string, message strin
 	}
 }
 
-var connected bool = false
+const (
+	ConnStateConnecting = iota
+	ConnStateConnected
+	ConnStateDisconnected
+)
+
+var connState = ConnStateConnecting
 
 func loop(conn net.Conn) {
 	reader := bufio.NewReader(conn)
@@ -63,6 +70,7 @@ func loop(conn net.Conn) {
 	for {
 		message, err := reader.ReadString('\n')
 		if err != nil {
+			connState = ConnStateDisconnected
 			if err == io.EOF {
 				log.Info("server closed connection")
 				break
@@ -72,10 +80,12 @@ func loop(conn net.Conn) {
 			}
 		}
 
-		if !connected {
+		// fmt.Print(message)
+
+		if connState == ConnStateConnecting {
 			if strings.Contains(message, "001") || strings.Contains(message, "Welcome") {
 				log.Info("connected to server!")
-				connected = true
+				connState = ConnStateConnected
 			}
 		}
 
@@ -108,11 +118,22 @@ func main() {
 	tcpConn, _ := conn.NetConn().(*net.TCPConn)
 	tcpConn.SetKeepAlive(true)
 
-	WriteSprintf(conn, "NICK %s\r\n", IRC_USERNAME)
-	WriteSprintf(conn, "USER %s %s %s :Real Name\r\n",
+	WritePrintf(conn, "NICK %s\r\n", IRC_USERNAME)
+	WritePrintf(conn, "USER %s %s %s :Real Name\r\n",
 		IRC_USERNAME, IRC_USERNAME, IRC_USERNAME)
 
-	WriteSprintf(conn, "JOIN %s\r\n", IRC_CHANNEL)
+	WritePrintf(conn, "JOIN %s\r\n", IRC_CHANNEL)
+
+	go func() {
+		for {
+			// go routine ends early anyway when loop returns
+			if connState == ConnStateDisconnected {
+				break
+			}
+			WritePrintf(conn, "PING reee\r\n")
+			time.Sleep(time.Second * 60)
+		}
+	}()
 
 	loop(conn)
 
