@@ -176,25 +176,23 @@ func imageForMumble(src image.Image, options *MumbleImageOptions) (string, error
 }
 
 func getRootChannel(client *gumble.Client) *gumble.Channel {
-	var rootChannel *gumble.Channel
-
 	for _, channel := range client.Channels {
 		if channel.ID == 0 {
-			rootChannel = channel
+			return channel
 		}
 	}
 
-	return rootChannel
+	return nil
 }
 
-func sendToAll(client *gumble.Client, message string) {
+func sendToAll(client *gumble.Client, message string) bool {
 	rootChannel := getRootChannel(client)
-
 	if rootChannel == nil {
-		return
+		return false
 	}
 
 	rootChannel.Send(message, true)
+	return true
 }
 
 func getEnv(key string, fallback string) string {
